@@ -1,3 +1,5 @@
 bash
 curl
 jq
+docker
+docker-compose
