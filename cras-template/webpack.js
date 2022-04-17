@@ -70,9 +70,11 @@ module.exports = env => {
                 {
                     loader: 'file-loader',
                     options: {
-                        outputPath: 'images'
+                        outputPath: 'images',
+                        esModule: false
                     }
-                }]
+                }],
+                type: 'javascript/auto'
             }]
         },
         plugins: [
