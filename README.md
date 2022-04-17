@@ -8,7 +8,6 @@ Create React apps with no ✨magic✨.
 
 Create React App works on Windows, and Linux.<br>
 If something doesn’t work, please [file an issue](https://github.com/AdamEscamilla/create-react-app-shell/issues/new).<br>
-If you have questions or need help, please ask in [GitHub Discussions](https://github.com/AdamEscamilla/create-react-app-shell/discussions).
 
 ## Creating an App
 
