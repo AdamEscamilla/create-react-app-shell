@@ -16,7 +16,8 @@ function App() {
     for prop in $props;
     do
         case $prop in
-            -h | --help) usage && exit 0;;
+            -h | --help)
+                usage && exit 0;;
             *) log 2 "unknown option \`$prop\`"
         esac
     done
@@ -31,14 +32,7 @@ function App() {
     trees=`jq '.tree[]|select(.type=="tree").path' -r <<< "$data"`
     blobs=`jq '.tree[]|select(.type=="blob").path' -r <<< "$data"`
 
-    fetch -o requirements.txt https://raw.githubusercontent.com/${remote}/${branch}/requirements.txt
-
-    if ! requires;
-    then
-        rm requirements.txt
-        log 2 "missing package dependency"
-    fi
-    rm requirements.txt
+    validate https://raw.githubusercontent.com/${remote}/${branch}/requirements.txt
 
     log 0 "`banner`"
     log 0 "Creating a new React app in ${WORKDIR}/${project}."
@@ -82,6 +76,14 @@ function App() {
     exit 0
 }
 
+function validate {
+    packages=`fetch -o - $*`
+    if ! requires $packages;
+    then
+        log 2 "missing package dependency"
+    fi
+}
+
 function fetch { curl -s $* ; }
 
 function log() { state=$1;
@@ -123,7 +125,7 @@ Examples
 
 function requires() {
     local package
-    while read dependency
+    for dependency in $@
     do
         [ -z $dependency ] && continue
         package=$(command -v $dependency)
@@ -131,8 +133,8 @@ function requires() {
             printf "missing %s package\n" $dependency
             return 1
         fi
-        return 0
-    done < requirements.txt
+    done
+    return 0
 }
 
 function banner() {
