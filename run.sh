@@ -123,6 +123,7 @@ Options
 
 Templates
     cras-template   React javascript (defualt)
+    cras-template-tw   React javascript w/ tailwind
 
 Examples
     Create a new React app
