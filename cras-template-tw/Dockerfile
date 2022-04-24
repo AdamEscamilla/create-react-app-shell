@@ -8,6 +8,11 @@ COPY package.json package.json
 COPY webpack.js .
 COPY env .env
 
+# TailWind
+COPY tailwind.config.js tailwind.config.js
+ENV TW_PACKAGES \
+    tailwindcss@latest
+
 RUN npm init -y
 RUN npm install --save-dev \
     webpack \
@@ -27,7 +32,8 @@ RUN npm install --save-dev \
     dotenv-webpack \
     eslint-config-prettier \
     webpack-dev-server \
-    react-devtools
+    react-devtools \
+    $TW_PACKAGES
 
 RUN npm install --only=dev
 
