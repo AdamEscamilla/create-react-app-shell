@@ -1,6 +1,7 @@
 {
   "scripts": {
-    "dev": "npx tailwindcss -i ./src/index.css -o ./public/tailwind.css && TAILWIND_MODE=watch webpack serve --mode development --env development --config webpack.js"
+    "dev": "webpack serve --mode development --env development --config webpack.js & npm run tailwind:watch && kill $!",
+    "tailwind:watch": "npx tailwindcss -i ./src/index.css -o ./public/tailwind.css --watch"
   },
   "name": "cras-template",
   "version": "1.0.0",
