@@ -6,33 +6,37 @@ WORKDIR=$(pwd)
 CMD=App
 
 function App() {
-    [ $# -eq 0 ] && set -- null -h;
-    project=$1; shift;
+    [ $# -eq 0 ] && { usage && exit 1; }
     props=$@;
-    template=cras-template
+    branch=master;
+    remote=AdamEscamilla/create-react-app-shell;
+    default_template=cras-template;
 
-    [ $project == '-h' ] && { usage;  exit 0; }
+    validate https://raw.githubusercontent.com/${remote}/${branch}/requirements.txt
 
     for prop in $props;
     do
         case $prop in
+            -p=* | --project=*)
+                project="${prop#*=}"; shift;;
+            -t=* | --template=*)
+                template="${prop#*=}"; shift;;
             -h | --help)
                 usage && exit 0;;
             *) log 2 "unknown option \`$prop\`"
         esac
     done
 
+    [ -z ${project:-} ] && log 2 "missing project name"
     [ -d $project ] && log 2 "path ${project} exists"
 
-    remote=AdamEscamilla/create-react-app-shell
-    branch=master
-    url=https://api.github.com/repos/${remote}/git/trees/${branch}?recursive=1
-    data=`fetch $url`
+    template=${template:-$default_template}
+    data=`fetch https://api.github.com/repos/${remote}/git/trees/${branch}?recursive=1`
 
-    trees=`jq '.tree[]|select(.type=="tree").path' -r <<< "$data"`
-    blobs=`jq '.tree[]|select(.type=="blob").path' -r <<< "$data"`
+    trees=`jq --arg tmpl $template '.tree[]|select((.path|test($tmpl+"/")?) and .type=="tree").path' -r <<< "$data"`
+    blobs=`jq --arg tmpl $template '.tree[]|select((.path|test($tmpl+"/")?) and .type=="blob").path' -r <<< "$data"`
 
-    validate https://raw.githubusercontent.com/${remote}/${branch}/requirements.txt
+    [ -z "$trees" -o -z "$blobs" ] && log 2 "template ${template} not found"
 
     log 0 "`banner`"
     log 0 "Creating a new React app in ${WORKDIR}/${project}."
@@ -110,14 +114,21 @@ function trimURL() { sed 's/?.*//' ; }
 function usage() {
     echo "
 Usage:
-    create-react-app-shell <project name> [-h]
+    create-react-app-shell --project=<name> [--template=<name>|-h]
 
 Options
+    -p, --project   this project name
+    -t, --template  use specific template
     -h, --help      Show the help menu
+
+Templates
+    cras-template   React javascript (defualt)
 
 Examples
     Create a new React app
-    \$ create-react-app-shell my-app
+    \$ create-react-app-shell -p=my-app
+    Use a different React app template
+    \$ create-react-app-shell -p=my-app -t=cras-template
     Show the help menu
     \$ create-react-app-shell -h
 ";
